@@ -1,9 +1,4 @@
-/*
-* @Author: jerry
-* @Date:   2021-09-30 11:15:45
-* @Last Modified by:   jerry
-* @Last Modified time: 2021-09-30 11:18:00
-*/
+
 #include <iostream>
 // #include <opencv2/opencv.hpp>
 // #include <opencv2/core/core.hpp>

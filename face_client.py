@@ -12,7 +12,7 @@ from Client_UI.face_success_m_ui import success_ui
 from Client_UI.face_failed import error_ui
 from seetaface.faceapi import *
 
-# 引擎初始化
+# 引擎初始化开始
 func_list = ["FACE_RECOGNITION", "LANDMARKER5", "FACE_CLARITY", "FACE_BRIGHT", "FACE_RESOLUTION",
              "FACE_POSE", "FACE_INTEGRITY", "FACE_TRACK"]
 model_path = "./seeta/model"
@@ -24,9 +24,13 @@ last_PID = ''
 frame = ''
 
 
+# 引擎初始化完毕
+
+
 def load_encode(seetaFace):
     """
     从数据库中获取保存的手机号与人脸向量
+    返还手机号列表以及人脸向量列表
     """
     database = './face.db'
     conn = sqlite3.connect(database)
@@ -53,6 +57,10 @@ phone_num_list, face_data_list = load_encode(seetaFace)
 
 
 class MyWindowClass(QMainWindow, MainUI):
+    """
+    主窗口类
+    """
+
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
         super().__init__(parent)
@@ -79,6 +87,10 @@ class MyWindowClass(QMainWindow, MainUI):
         self.move(qr.topLeft())
 
     def success_show(self):
+        """
+        成功识别后的界面
+        :return:
+        """
         show_success = FaceSuccessWidget()
         show_success.OPEN()
         show_success.close_timer = QTimer(show_success)  # 初始化一个定时器
@@ -86,6 +98,10 @@ class MyWindowClass(QMainWindow, MainUI):
         show_success.close_timer.start(2000)  # 设置计时间隔并启动 2s后关闭窗口
 
     def fail_show(self):
+        """
+        识别失败后的界面
+        :return:
+        """
         self.show_fail = FaceFailedWidget()
         self.show_fail.OPEN()
         self.show_fail.close_timer = QTimer(self.show_fail)
@@ -93,31 +109,28 @@ class MyWindowClass(QMainWindow, MainUI):
         self.show_fail.close_timer.start(2000)  # 设置计时间隔并启动 2s后关闭窗口
 
     def decodeDisplay(self, ):
-        """
-        QR
-        """
         global frame
-        # self.cap = cv2.VideoCapture(5)  # 初始化摄像头
-        # flag, self.image = self.cap.read()
-        # show = cv2.resize(self.image, (480, 640))
-        # show = cv2.cvtColor(show, cv2.COLOR_BGR2RGB)
-        # showImage = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
-        # self.show_camera_label.setPixmap(QtGui.QPixmap.fromImage(showImage))
+        self.cap = cv2.VideoCapture(5)  # 初始化摄像头
+        flag, self.image = self.cap.read()
+        show = cv2.resize(self.image, (480, 640))
+        show = cv2.cvtColor(show, cv2.COLOR_BGR2RGB)
+        showImage = QtGui.QImage(show.data, show.shape[1], show.shape[0], QtGui.QImage.Format_RGB888)
+        self.show_camera_label.setPixmap(QtGui.QPixmap.fromImage(showImage))
         # 转为灰度图像
         self.cap.set(3, 480)
         ret, frame = self.cap.read()
         frame = cv2.resize(frame, (640, 480))
         # 人脸画框 #######
-        # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        # classifier = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
-        # faceRects = classifier.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=3, minSize=(32, 32))
-        # if len(faceRects):
-        #     # print("有人脸")
-        #
-        #     for faceRect in faceRects:
-        #         x, y, w, h = faceRect
-        #         # 框选出人脸   最后一个参数2是框线宽度
-        #         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        classifier = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+        faceRects = classifier.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=3, minSize=(32, 32))
+        if len(faceRects):
+            # print("有人脸")
+
+            for faceRect in faceRects:
+                x, y, w, h = faceRect
+                # 框选出人脸   最后一个参数2是框线宽度
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
         # gray_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         # barcodes = pyzbar.decode(gray_image)
         # for barcode in barcodes:
@@ -140,6 +153,11 @@ class MyWindowClass(QMainWindow, MainUI):
         # self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
     def face_result(self, msg):
+        """
+        回调函数，接收人脸识别线程的结果
+        :param msg:
+        :return:
+        """
         if msg == "陌生人":
             print("是陌生人")
             self.fail_show()
@@ -190,6 +208,9 @@ class FaceFailedWidget(error_ui):
 
 
 class DetectThread(QThread):
+    """
+    人脸识别线程
+    """
     signal = pyqtSignal(str)
 
     def __init__(self):
@@ -215,16 +236,17 @@ class DetectThread(QThread):
                     quality_list.append(bright_level)
 
                     # 多种人脸姿态与状态检测 #########
-                    # resolution_level = seetaFace.ResolutionEvaluate(simage, face, points5)
-                    # quality_list.append(resolution_level)
-                    # pose_level = seetaFace.PoseEvaluate(simage, face, points5)
-                    # quality_list.append(pose_level)
-                    # integrity_level = seetaFace.IntegrityEvaluate(simage, face, points5)
-                    # quality_list.append(integrity_level)
-                    # print(quality_list)
+                    resolution_level = seetaFace.ResolutionEvaluate(simage, face, points5)
+                    quality_list.append(resolution_level)
+                    pose_level = seetaFace.PoseEvaluate(simage, face, points5)
+                    quality_list.append(pose_level)
+                    integrity_level = seetaFace.IntegrityEvaluate(simage, face, points5)
+                    quality_list.append(integrity_level)
+                    print(quality_list)
                     # 多种人脸姿态与状态检测 #########
 
                     if quality_list == ['HIGH', 'HIGH']:
+                        # 可以自由设置多种状态检测
                         cal_time_start = datetime.datetime.now()
                         print('开始', cal_time_start)
                         # if 1 == 1:
@@ -233,6 +255,7 @@ class DetectThread(QThread):
                         for ac in face_data_list:
                             similar1 = seetaFace.CalculateSimilarity(feature, ac)
                             # print('相似度', similar1, phone_num_list[face_data_list.index(ac)])
+                            # 相似度大于0.6放入待处理列表中
                             if similar1 >= 0.6:
                                 pre.append((phone_num_list[face_data_list.index(ac)], similar1))
 
@@ -241,10 +264,12 @@ class DetectThread(QThread):
                         if pre:
                             print(pre[0][0])
                             NAME = pre[0][0]
+                            # 发送识别结果
                             self.signal.emit(NAME)
                             last_PID = PID
                         else:
                             print('陌生人')
+                            # 发送识别结果
                             self.signal.emit("陌生人")
                             last_PID = PID
                             cal_time_end = datetime.datetime.now()
