@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="448" height="4" viewBox="0 0 448 4">
+  <defs>
+    <style>
+      .cls-1, .cls-2 {
+        fill-rule: evenodd;
+      }
+
+      .cls-2 {
+        fill: #fff;
+        opacity: 0.2;
+      }
+    </style>
+  </defs>
+  <path id="形状_1" data-name="形状 1" class="cls-1" d="M0,2V1H448V2H0Z"/>
+  <path id="形状_1_拷贝" data-name="形状 1 拷贝" class="cls-2" d="M0,3V2H448V3H0Z"/>
+</svg>
