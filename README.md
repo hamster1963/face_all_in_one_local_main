@@ -25,3 +25,6 @@ sudo ldconfig
     ```bash
     python3 seeta动态库测试t.py
     ```
+    
+## 全部文件
+https://pan.baidu.com/s/15qsbLLOQJxG--Wbs7jIJzg?pwd=b3fk
